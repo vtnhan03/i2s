@@ -53,21 +53,15 @@ I2SSampler::I2SSampler()
 
 void I2SSampler::start(i2s_port_t i2s_port, i2s_config_t &i2s_config, TaskHandle_t processor_task_handle)
 {
-    Serial.println("dong 56");
     Serial.println("Starting i2s");
     m_i2s_port = i2s_port;
     m_processor_task_handle = processor_task_handle;
-    // install and start i2s driver
+    //install and start i2s driver
     i2s_driver_install(m_i2s_port, &i2s_config, 4, &m_i2s_queue);
-    Serial.println("dong 61");
-
     // set up the I2S configuration from the subclass
     configureI2S();
     // start a task to read samples
-    Serial.println("dong 66");
-
     xTaskCreate(i2sReaderTask, "i2s Reader Task", 4096, this, 1, &m_reader_task_handle);
-    Serial.println("dong 69");
 }
 
 RingBufferAccessor *I2SSampler::getRingBufferReader()

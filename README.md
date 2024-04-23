@@ -4,8 +4,6 @@ This folder contains the firmware for running DIY Alexa on the ESP32.
 
 We are using Platform.io to build the firmware.
 
-You will also need to upload the SPIFFs filesystem as there are some WAV files that are played.
-
 If you're having problems detecting the wakeword `Marvin` then you can try lowering the detection threshold:
 
 `/src/state_machine/DetectWakeWordState.cpp` line 59.
@@ -73,4 +71,3 @@ Finally, we have the access key for wit.ai - I will leave my key active for as l
 // command recognition settings
 #define COMMAND_RECOGNITION_ACCESS_KEY "UFFEIMRQL7LH4T2DXRHKER4HPMFB4LNH"
 ```
-"# i2s" 

@@ -4,13 +4,14 @@
 #include <esp_task_wdt.h>
 #include "I2SMicSampler.h"
 #include "ADCSampler.h"
-#include "I2SOutput.h"
 #include "config.h"
 #include "Application.h"
 #include "SPIFFS.h"
-#include "IntentProcessor.h"
-#include "Speaker.h"
 #include "IndicatorLight.h"
+#include <GyverOLED.h>
+
+GyverOLED<SSD1306_128x64, OLED_NO_BUFFER> oled;
+
 
 // i2s config for using the internal ADC
 i2s_config_t adcI2SConfig = {
@@ -32,7 +33,7 @@ i2s_config_t i2sMemsConfigBothChannels = {
     .sample_rate = 16000,
     .bits_per_sample = I2S_BITS_PER_SAMPLE_32BIT,
     .channel_format = I2S_MIC_CHANNEL,
-    .communication_format = i2s_comm_format_t(I2S_COMM_FORMAT_I2S),
+    .communication_format = I2S_COMM_FORMAT_STAND_I2S,
     .intr_alloc_flags = ESP_INTR_FLAG_LEVEL1,
     .dma_buf_count = 4,
     .dma_buf_len = 64,
@@ -47,12 +48,6 @@ i2s_pin_config_t i2s_mic_pins = {
     .data_out_num = I2S_PIN_NO_CHANGE,
     .data_in_num = I2S_MIC_SERIAL_DATA};
 
-// i2s speaker pins
-i2s_pin_config_t i2s_speaker_pins = {
-    .bck_io_num = I2S_SPEAKER_SERIAL_CLOCK,
-    .ws_io_num = I2S_SPEAKER_LEFT_RIGHT_CLOCK,
-    .data_out_num = I2S_SPEAKER_SERIAL_DATA,
-    .data_in_num = I2S_PIN_NO_CHANGE};
 
 // This task does all the heavy lifting for our application
 void applicationTask(void *param)
@@ -67,15 +62,21 @@ void applicationTask(void *param)
     if (ulNotificationValue > 0)
     {
       application->run();
+      
     }
   }
 }
 
 void setup()
 {
+  oled.init();  
+  oled.clear();  // очистить дисплей (или буфер)
+  oled.update();
+
   Serial.begin(115200);
   delay(1000);
   Serial.println("Starting up");
+  
   // start up wifi
   // launch WiFi
   WiFi.mode(WIFI_STA);
@@ -90,7 +91,6 @@ void setup()
   Serial.printf("Free heap: %d\n", ESP.getFreeHeap());
 
   // startup SPIFFS for the wav files
-  SPIFFS.begin();
   // make sure we don't get killed for our long running tasks
   esp_task_wdt_init(10, false);
 
@@ -103,22 +103,18 @@ void setup()
   I2SSampler *i2s_sampler = new ADCSampler(ADC_UNIT_1, ADC_MIC_CHANNEL);
 #endif
 
-  // start the i2s speaker output
-  I2SOutput *i2s_output = new I2SOutput();
-  i2s_output->start(I2S_NUM_1, i2s_speaker_pins);
-  Speaker *speaker = new Speaker(i2s_output);
+
 
   // indicator light to show when we are listening
   IndicatorLight *indicator_light = new IndicatorLight();
 
   // and the intent processor
-  IntentProcessor *intent_processor = new IntentProcessor(speaker);
-  intent_processor->addDevice("kitchen", GPIO_NUM_5);
-  intent_processor->addDevice("bedroom", GPIO_NUM_21);
-  intent_processor->addDevice("table", GPIO_NUM_23);
+ 
+
+
 
   // create our application
-  Application *application = new Application(i2s_sampler, intent_processor, speaker, indicator_light);
+  Application *application = new Application(i2s_sampler, indicator_light);
 
   // set up the i2s sample writer task
   TaskHandle_t applicationTaskHandle;

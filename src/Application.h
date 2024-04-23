@@ -7,8 +7,6 @@ class I2SSampler;
 class I2SOutput;
 class State;
 class IndicatorLight;
-class Speaker;
-class IntentProcessor;
 
 class Application
 {
@@ -18,7 +16,7 @@ private:
     State *m_current_state;
 
 public:
-    Application(I2SSampler *sample_provider, IntentProcessor *intent_processor, Speaker *speaker, IndicatorLight *indicator_light);
+    Application(I2SSampler *sample_provider, IndicatorLight *indicator_light);
     ~Application();
     void run();
 };
