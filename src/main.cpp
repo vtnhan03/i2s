@@ -8,7 +8,6 @@
 #include "Application.h"
 #include "SPIFFS.h"
 #include "IndicatorLight.h"
-#include <GyverOLED.h>
 #include "WebSocketsClient.h"
 
 const char *webSocketServer = "54.252.68.21";
