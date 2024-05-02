@@ -9,9 +9,24 @@
 #include "SPIFFS.h"
 #include "IndicatorLight.h"
 #include <GyverOLED.h>
+#include "WebSocketsClient.h"
 
-GyverOLED<SSD1306_128x64, OLED_NO_BUFFER> oled;
-
+const char *webSocketServer = "54.252.68.21";
+const int webSocketPort = 8765;
+int ledPin1 = 33;
+int ledPin2 = 25;
+int ledPin3 = 26;
+int ledPin4 = 27;
+const char *BatDen = "Bat 1";
+const char *TatDen = "Tat 1";
+const char *BatQuat = "Bat 2";
+const char *TatQuat = "Tat 2";
+const char *BatTivi = "Bat 3";
+const char *TatTivi = "Tat 3";
+const char *MoCua = "Bat 4";
+const char *DongCua = "Tat 4";
+size_t expected_length = strlen(BatDen);
+WebSocketsClient webSocket;
 
 // i2s config for using the internal ADC
 i2s_config_t adcI2SConfig = {
@@ -48,7 +63,6 @@ i2s_pin_config_t i2s_mic_pins = {
     .data_out_num = I2S_PIN_NO_CHANGE,
     .data_in_num = I2S_MIC_SERIAL_DATA};
 
-
 // This task does all the heavy lifting for our application
 void applicationTask(void *param)
 {
@@ -62,21 +76,72 @@ void applicationTask(void *param)
     if (ulNotificationValue > 0)
     {
       application->run();
-      
     }
+  }
+}
+void webSocketEvent(WStype_t type, uint8_t *payload, size_t length)
+{
+  switch (type)
+  {
+  case WStype_DISCONNECTED:
+    Serial.println("Disconnected from WebSocket");
+    break;
+  case WStype_CONNECTED:
+    Serial.println("Connected to WebSocket");
+    break;
+  case WStype_TEXT:
+    Serial.printf("Received text: %s\n", payload);
+    if (memcmp(payload, BatDen, expected_length) == 0)
+    {
+      digitalWrite(ledPin1, HIGH);
+    }
+    else if (memcmp(payload, TatDen, expected_length) == 0)
+    {
+      digitalWrite(ledPin1, LOW);
+    }
+    else if (memcmp(payload, BatQuat, expected_length) == 0)
+    {
+      digitalWrite(ledPin2, HIGH);
+    }
+    else if (memcmp(payload, TatQuat, expected_length) == 0)
+    {
+      digitalWrite(ledPin2, LOW);
+    }
+    else if (memcmp(payload, BatTivi, expected_length) == 0)
+    {
+      digitalWrite(ledPin3, HIGH);
+    }
+    else if (memcmp(payload, TatTivi, expected_length) == 0)
+    {
+      digitalWrite(ledPin3, LOW);
+    }
+    else if (memcmp(payload, MoCua, expected_length) == 0)
+    {
+      digitalWrite(ledPin4, HIGH);
+    }
+    else if (memcmp(payload, DongCua, expected_length) == 0)
+    {
+      digitalWrite(ledPin4, LOW);
+    }
+    break;
+  }
+}
+
+void loop1(void *pvParameters)
+{
+  while (true)
+  {
+    webSocket.loop();
+    delay(10);
   }
 }
 
 void setup()
 {
-  oled.init();  
-  oled.clear();  // очистить дисплей (или буфер)
-  oled.update();
-
   Serial.begin(115200);
   delay(1000);
   Serial.println("Starting up");
-  
+
   // start up wifi
   // launch WiFi
   WiFi.mode(WIFI_STA);
@@ -89,7 +154,9 @@ void setup()
   }
   Serial.printf("Total heap: %d\n", ESP.getHeapSize());
   Serial.printf("Free heap: %d\n", ESP.getFreeHeap());
-
+  webSocket.begin(webSocketServer, uint16_t(webSocketPort));
+  webSocket.onEvent(webSocketEvent);
+  xTaskCreatePinnedToCore(loop1, "loop1", 4096, NULL, 1, NULL, 0);
   // startup SPIFFS for the wav files
   // make sure we don't get killed for our long running tasks
   esp_task_wdt_init(10, false);
@@ -103,15 +170,10 @@ void setup()
   I2SSampler *i2s_sampler = new ADCSampler(ADC_UNIT_1, ADC_MIC_CHANNEL);
 #endif
 
-
-
   // indicator light to show when we are listening
   IndicatorLight *indicator_light = new IndicatorLight();
 
   // and the intent processor
- 
-
-
 
   // create our application
   Application *application = new Application(i2s_sampler, indicator_light);
