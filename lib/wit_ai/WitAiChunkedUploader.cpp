@@ -3,7 +3,7 @@
 #include <WiFi.h>
 #include <ArduinoJson.h>
 
-#define ServerIP "192.168.137.12"
+#define ServerIP "192.168.137.1"
 #define ServerPort 5003
 
 WitAiChunkedUploader::WitAiChunkedUploader(const char *access_key)

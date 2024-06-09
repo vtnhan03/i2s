@@ -10,21 +10,21 @@
 #include "IndicatorLight.h"
 #include "WebSocketsClient.h"
 
-const char *webSocketServer = "54.252.68.21";
-const int webSocketPort = 8765;
-int ledPin1 = 33;
-int ledPin2 = 25;
-int ledPin3 = 26;
-int ledPin4 = 27;
-const char *BatDen = "Bat 1";
-const char *TatDen = "Tat 1";
-const char *BatQuat = "Bat 2";
-const char *TatQuat = "Tat 2";
-const char *BatTivi = "Bat 3";
-const char *TatTivi = "Tat 3";
-const char *MoCua = "Bat 4";
-const char *DongCua = "Tat 4";
-size_t expected_length = strlen(BatDen);
+const char *webSocketServer = "3.25.190.4";
+const int webSocketPort = 2003;
+int ledPin1 = 19;
+int ledPin2 = 18;
+int ledPin3 = 5;
+int ledPin4 = 17;
+const char *BDPN = "BDPN";
+const char *TDPN = "TDPN";
+const char *BQPN = "BQPN";
+const char *TQPN = "TQPN";
+const char *BDPK = "BDPK";
+const char *TDPK = "TDPK"; 
+const char *BQPK = "BQPK";
+const char *TQPK = "TQPK";
+size_t expected_length = strlen(BDPN);
 WebSocketsClient webSocket;
 
 // i2s config for using the internal ADC
@@ -90,35 +90,35 @@ void webSocketEvent(WStype_t type, uint8_t *payload, size_t length)
     break;
   case WStype_TEXT:
     Serial.printf("Received text: %s\n", payload);
-    if (memcmp(payload, BatDen, expected_length) == 0)
+    if (memcmp(payload, BDPN, expected_length) == 0)
     {
       digitalWrite(ledPin1, HIGH);
     }
-    else if (memcmp(payload, TatDen, expected_length) == 0)
+    else if (memcmp(payload, TDPN, expected_length) == 0)
     {
       digitalWrite(ledPin1, LOW);
     }
-    else if (memcmp(payload, BatQuat, expected_length) == 0)
+    else if (memcmp(payload, BQPN, expected_length) == 0)
     {
       digitalWrite(ledPin2, HIGH);
     }
-    else if (memcmp(payload, TatQuat, expected_length) == 0)
+    else if (memcmp(payload, TQPN, expected_length) == 0)
     {
       digitalWrite(ledPin2, LOW);
     }
-    else if (memcmp(payload, BatTivi, expected_length) == 0)
+    else if (memcmp(payload, BDPK, expected_length) == 0)
     {
       digitalWrite(ledPin3, HIGH);
     }
-    else if (memcmp(payload, TatTivi, expected_length) == 0)
+    else if (memcmp(payload, TDPK, expected_length) == 0)
     {
       digitalWrite(ledPin3, LOW);
     }
-    else if (memcmp(payload, MoCua, expected_length) == 0)
+    else if (memcmp(payload, BQPK, expected_length) == 0)
     {
       digitalWrite(ledPin4, HIGH);
     }
-    else if (memcmp(payload, DongCua, expected_length) == 0)
+    else if (memcmp(payload, TQPK, expected_length) == 0)
     {
       digitalWrite(ledPin4, LOW);
     }
@@ -137,6 +137,10 @@ void loop1(void *pvParameters)
 
 void setup()
 {
+  pinMode(ledPin1, OUTPUT);
+  pinMode(ledPin2, OUTPUT);
+  pinMode(ledPin3, OUTPUT);
+  pinMode(ledPin4, OUTPUT);
   Serial.begin(115200);
   delay(1000);
   Serial.println("Starting up");
