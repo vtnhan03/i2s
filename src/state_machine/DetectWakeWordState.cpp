@@ -59,7 +59,7 @@ bool DetectWakeWordState::run()
     }
     // use quite a high threshold to prevent false positives
     Serial.println(output);
-    if (output > 0.85)
+    if (output > 0.80)
     {
         m_number_of_detections++;
         if (m_number_of_detections > 1)

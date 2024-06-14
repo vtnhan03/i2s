@@ -10,7 +10,7 @@
 #include "IndicatorLight.h"
 #include "WebSocketsClient.h"
 
-const char *webSocketServer = "3.25.190.4";
+const char *webSocketServer = "13.229.105.152";
 const int webSocketPort = 2003;
 int ledPin1 = 19;
 int ledPin2 = 18;
@@ -87,6 +87,7 @@ void webSocketEvent(WStype_t type, uint8_t *payload, size_t length)
     break;
   case WStype_CONNECTED:
     Serial.println("Connected to WebSocket");
+    webSocket.sendTXT("name:ESP");
     break;
   case WStype_TEXT:
     Serial.printf("Received text: %s\n", payload);
