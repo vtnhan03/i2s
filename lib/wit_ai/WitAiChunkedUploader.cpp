@@ -3,21 +3,17 @@
 #include <WiFi.h>
 #include <ArduinoJson.h>
 
-#define ServerIP "192.168.137.1"
+#define ServerIP "192.168.229.3"
 #define ServerPort 5003
 
-WitAiChunkedUploader::WitAiChunkedUploader(const char *access_key)
+WitAiChunkedUploader::WitAiChunkedUploader()
 {
     m_wifi_client = new WiFiClient();
     
     m_wifi_client->connect(ServerIP, ServerPort);
-    //char authorization_header[100];
-    //snprintf(authorization_header, 100, "authorization: Bearer %s", access_key);
-    //m_wifi_client->println("POST /speech?v=20200927 HTTP/1.1");
+   
     m_wifi_client->println("POST /esp32 HTTP/1.1");
-    //m_wifi_client->println("host: api.wit.ai");
-    //m_wifi_client->println("host: 192.168.0.185");
-    //m_wifi_client->println(authorization_header);
+    
     m_wifi_client->println("content-type: audio/raw; encoding=signed-integer; bits=16; rate=16000; endian=little");
     m_wifi_client->println("transfer-encoding: chunked");
     m_wifi_client->println();

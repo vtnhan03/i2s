@@ -25,7 +25,7 @@ private:
     WiFiClient *m_wifi_client;
 
 public:
-    WitAiChunkedUploader(const char *access_key);
+    WitAiChunkedUploader();
     ~WitAiChunkedUploader();
     bool connected();
     void startChunk(int size_in_bytes);

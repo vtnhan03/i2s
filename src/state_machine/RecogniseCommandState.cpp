@@ -33,7 +33,7 @@ void RecogniseCommandState::enterState()
     uint32_t free_ram = esp_get_free_heap_size();
     Serial.printf("Free ram before connection %d\n", free_ram);
 
-    m_speech_recogniser = new WitAiChunkedUploader(COMMAND_RECOGNITION_ACCESS_KEY);
+    m_speech_recogniser = new WitAiChunkedUploader();
 
     Serial.println("Ready for action");
 

@@ -59,14 +59,14 @@ bool DetectWakeWordState::run()
     }
     // use quite a high threshold to prevent false positives
     Serial.println(output);
-    if (output > 0.85)
+    if (output > 0.80)
     {
         m_number_of_detections++;
         if (m_number_of_detections > 1)
         {
             m_number_of_detections = 0;
             // detected the wake word in several runs, move to the next state
-            Serial.printf("P(%.2f): Я слушаю\n", output);
+            Serial.printf("P(%.2f)\n", output);
             return true;
         }
     }

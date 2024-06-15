@@ -3,7 +3,6 @@
 #include "state_machine/DetectWakeWordState.h"
 #include "state_machine/RecogniseCommandState.h"
 #include "IndicatorLight.h"
-#include <GyverOLED.h>
 
 Application::Application(I2SSampler *sample_provider, IndicatorLight *indicator_light)
 {

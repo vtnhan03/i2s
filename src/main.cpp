@@ -9,8 +9,13 @@
 #include "SPIFFS.h"
 #include "IndicatorLight.h"
 #include "WebSocketsClient.h"
+#include "DHT.h"
 
-const char *webSocketServer = "3.25.190.4";
+#define DHTPIN 4      // Pin kết nối với cảm biến DHT
+#define DHTTYPE DHT22 // DHT 22 (AM2302), AM2321
+
+DHT dht(DHTPIN, DHTTYPE);
+const char *webSocketServer = "13.229.105.152";
 const int webSocketPort = 2003;
 int ledPin1 = 19;
 int ledPin2 = 18;
@@ -21,7 +26,7 @@ const char *TDPN = "TDPN";
 const char *BQPN = "BQPN";
 const char *TQPN = "TQPN";
 const char *BDPK = "BDPK";
-const char *TDPK = "TDPK"; 
+const char *TDPK = "TDPK";
 const char *BQPK = "BQPK";
 const char *TQPK = "TQPK";
 size_t expected_length = strlen(BDPN);
@@ -87,6 +92,7 @@ void webSocketEvent(WStype_t type, uint8_t *payload, size_t length)
     break;
   case WStype_CONNECTED:
     Serial.println("Connected to WebSocket");
+    webSocket.sendTXT("name:ESP");
     break;
   case WStype_TEXT:
     Serial.printf("Received text: %s\n", payload);
@@ -134,7 +140,26 @@ void loop1(void *pvParameters)
     delay(10);
   }
 }
+void sendTemperatureAndHumidity(void *pvParameters)
+{
+  while (true)
+  {
+    float h = dht.readHumidity();
+    float t = dht.readTemperature();
 
+    if (isnan(h) || isnan(t))
+    {
+      Serial.println("Failed to read from DHT sensor!");
+    }
+    else
+    {
+      String payload = "infor:" + String(t) + "_" + String(h);
+      webSocket.sendTXT(payload);
+      Serial.println("Sent: " + payload);
+    }
+    vTaskDelay(5000 / portTICK_PERIOD_MS); // Delay 2 seconds
+  }
+}
 void setup()
 {
   pinMode(ledPin1, OUTPUT);
@@ -144,6 +169,7 @@ void setup()
   Serial.begin(115200);
   delay(1000);
   Serial.println("Starting up");
+  dht.begin();
 
   // start up wifi
   // launch WiFi
@@ -159,7 +185,9 @@ void setup()
   Serial.printf("Free heap: %d\n", ESP.getFreeHeap());
   webSocket.begin(webSocketServer, uint16_t(webSocketPort));
   webSocket.onEvent(webSocketEvent);
-  xTaskCreatePinnedToCore(loop1, "loop1", 4096, NULL, 1, NULL, 0);
+  // xTaskCreatePinnedToCore(loop1, "loop1", 4096, NULL, 1, NULL, 0);
+  xTaskCreatePinnedToCore(sendTemperatureAndHumidity, "sendTemperatureAndHumidity", 4096, NULL, 1, NULL, 0);
+
   // startup SPIFFS for the wav files
   // make sure we don't get killed for our long running tasks
   esp_task_wdt_init(10, false);
@@ -195,5 +223,6 @@ void setup()
 
 void loop()
 {
-  vTaskDelay(1000);
+  webSocket.loop();
+  // vTaskDelay(1000);
 }
