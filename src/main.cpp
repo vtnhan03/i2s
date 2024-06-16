@@ -29,6 +29,7 @@ const char *BDPK = "BDPK";
 const char *TDPK = "TDPK";
 const char *BQPK = "BQPK";
 const char *TQPK = "TQPK";
+const char *allhc = "all:";
 size_t expected_length = strlen(BDPN);
 WebSocketsClient webSocket;
 
@@ -96,6 +97,15 @@ void webSocketEvent(WStype_t type, uint8_t *payload, size_t length)
     break;
   case WStype_TEXT:
     Serial.printf("Received text: %s\n", payload);
+    if (memcmp(payload, allhc, 4)==0)
+    {
+    // "all:1011" (In order is the turn state of DPK,DPN,QPK,QPN. 1 is ON, 0 is OFF)
+      digitalWrite(ledPin3, payload[4]=='1'?HIGH:LOW);
+      digitalWrite(ledPin1, payload[5]=='1'?HIGH:LOW);
+      digitalWrite(ledPin4, payload[6]=='1'?HIGH:LOW);
+      digitalWrite(ledPin2, payload[7]=='1'?HIGH:LOW);
+    }
+    
     if (memcmp(payload, BDPN, expected_length) == 0)
     {
       digitalWrite(ledPin1, HIGH);
